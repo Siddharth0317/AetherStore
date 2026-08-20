@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import productRoutes from './routes/product.routes';
 import orderRoutes from './routes/order.routes';
+import paymentRoutes from './routes/payment.routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { sendSuccess } from './utils/apiResponse';
 
@@ -12,6 +13,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
+
+// Payment Routes (mounted before global express.json to preserve raw webhook body)
+app.use('/api/payments', paymentRoutes);
+
+// Global JSON middleware for standard endpoints
 app.use(express.json());
 
 // Health Check
