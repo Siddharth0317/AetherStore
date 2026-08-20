@@ -29,6 +29,14 @@ export class ApiError extends Error {
     return new ApiError(404, message, errorCode, details);
   }
 
+  static conflict(message = 'Conflict', errorCode = 'CONFLICT', details?: unknown) {
+    return new ApiError(409, message, errorCode, details);
+  }
+
+  static unprocessable(message = 'Unprocessable Entity', errorCode = 'UNPROCESSABLE_ENTITY', details?: unknown) {
+    return new ApiError(422, message, errorCode, details);
+  }
+
   static internal(message = 'Internal server error', errorCode = 'INTERNAL_ERROR', details?: unknown) {
     return new ApiError(500, message, errorCode, details, false);
   }

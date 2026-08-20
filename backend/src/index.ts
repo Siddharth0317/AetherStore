@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import productRoutes from './routes/product.routes';
+import orderRoutes from './routes/order.routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { sendSuccess } from './utils/apiResponse';
 
@@ -24,6 +25,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 // API Routes
 app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
 
 // 404 Fallback
 app.use(notFoundHandler);
