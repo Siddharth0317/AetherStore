@@ -2,13 +2,24 @@ import React from 'react';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
 
-export const CartDrawer: React.FC = () => {
+interface CartDrawerProps {
+  onProceedToCheckout?: () => void;
+}
+
+export const CartDrawer: React.FC<CartDrawerProps> = ({ onProceedToCheckout }) => {
   const { isCartOpen, closeCart, items, updateQuantity, removeItem, clearCart, getSubtotal } =
     useCartStore();
 
   if (!isCartOpen) return null;
 
   const subtotal = getSubtotal();
+
+  const handleCheckoutClick = () => {
+    closeCart();
+    if (onProceedToCheckout) {
+      onProceedToCheckout();
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -142,6 +153,7 @@ export const CartDrawer: React.FC = () => {
               </div>
 
               <button
+                onClick={handleCheckoutClick}
                 className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm transition shadow-lg shadow-indigo-500/25 flex items-center justify-center space-x-2 group"
               >
                 <span>Proceed to Checkout</span>

@@ -5,11 +5,35 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+export interface CheckoutOrderItem {
+  productId: string;
+  quantity: number;
+}
+
+export interface CheckoutOrderResponse {
+  orderId: string;
+  totalAmount: string | number;
+  currency: string;
+  status: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+    unitPrice: string | number;
+  }>;
+}
+
+export interface CreatePaymentIntentResponse {
+  clientSecret: string | null;
+  paymentIntentId: string;
+  amount: number;
+  currency: string;
+}
 
 export const fetchProducts = async (page = 1, limit = 20): Promise<ApiResponse<Product[]>> => {
   try {
@@ -18,7 +42,6 @@ export const fetchProducts = async (page = 1, limit = 20): Promise<ApiResponse<P
     });
     return response.data;
   } catch (err: unknown) {
-    // If relative /api fails in standalone mode, retry directly against backend port 5000
     if (axios.isAxiosError(err) && !err.response) {
       const fallbackResponse = await axios.get<ApiResponse<Product[]>>(
         'http://localhost:5000/api/products',
@@ -40,6 +63,49 @@ export const fetchProductBySlug = async (slug: string): Promise<ApiResponse<Prod
     if (axios.isAxiosError(err) && !err.response) {
       const fallbackResponse = await axios.get<ApiResponse<Product>>(
         `http://localhost:5000/api/products/${slug}`,
+      );
+      return fallbackResponse.data;
+    }
+    throw err;
+  }
+};
+
+export const createCheckoutOrder = async (
+  items: CheckoutOrderItem[],
+  currency = 'USD',
+): Promise<ApiResponse<CheckoutOrderResponse>> => {
+  try {
+    const response = await apiClient.post<ApiResponse<CheckoutOrderResponse>>('/orders/checkout', {
+      items,
+      currency,
+    });
+    return response.data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err) && !err.response) {
+      const fallbackResponse = await axios.post<ApiResponse<CheckoutOrderResponse>>(
+        'http://localhost:5000/api/orders/checkout',
+        { items, currency },
+      );
+      return fallbackResponse.data;
+    }
+    throw err;
+  }
+};
+
+export const createPaymentIntent = async (
+  orderId: string,
+): Promise<ApiResponse<CreatePaymentIntentResponse>> => {
+  try {
+    const response = await apiClient.post<ApiResponse<CreatePaymentIntentResponse>>(
+      '/payments/create-intent',
+      { orderId },
+    );
+    return response.data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err) && !err.response) {
+      const fallbackResponse = await axios.post<ApiResponse<CreatePaymentIntentResponse>>(
+        'http://localhost:5000/api/payments/create-intent',
+        { orderId },
       );
       return fallbackResponse.data;
     }
